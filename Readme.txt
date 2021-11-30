@@ -1,0 +1,1 @@
+Zadania przerabiane z baz danych.
