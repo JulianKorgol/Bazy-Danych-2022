@@ -1,22 +1,27 @@
-USE Sprawdzian2Hotel
+USE Szkola
 GO
 
---Odpowiedzi do sprawdzianu:
---11.
-SELECT count(*)
-FROM Pokoje
-LEFT OUTER JOIN Sprzatanie S on Pokoje.Id = S.PokojId
-WHERE PracowinkId IS NULL
+--1.
+-- CREATE DATABASE Szkola
 
---12.
-SELECT *
-FROM Sprzatanie
-FULL OUTER JOIN Pokoje P on P.Id = Sprzatanie.PokojId
-FULL OUTER JOIN Goscie G on P.Id = G.PokojId
-WHERE Sprzatanie.DzienTygodnia = 'œr' AND g.PokojId IS NULL
+--2. -> Na sprawdzian
+CREATE TABLE Uczen (ID INT NOT NULL IDENTITY(1,1),
+Imie VARCHAR(30) NOT NULL CHECK(LEN(Imie) >= 3),
+DrugieImie VARCHAR(30) CHECK(LEN(DrugieImie) >= 3),
+Nazwisko VARCHAR(30) NOT NULL CHECK(LEN(Nazwisko) >= 3),
+DataUrodzenia DATE NOT NULL)
 
---13.
-SELECT P.Id, P.Pietro, COUNT(s.DzienTygodnia)
-FROM Sprzatanie s
-FULL OUTER JOIN Pokoje P on s.PokojId = P.Id
-GROUP BY P.Id, P.Pietro
+--3.
+ALTER TABLE Uczen
+ADD SredniaOcen NUMERIC(3,2) NOT NULL CHECK(1.0 >= SredniaOcen AND SredniaOcen >= 6.0) DEFAULT(5.0)
+
+--4.
+ALTER Table Uczen
+ALTER COLUMN Nazwisko VARCHAR(50)
+
+--5.
+-- ALTER Table Uczen
+-- ALTER COLUMN DataUrodzenia DATE NOT NULL CHECK(DATEDIFF(YEAR, GETDATE(), DataUrodzenia) >= 16)
+
+ALTER TABLE Uczen
+ADD CONSTRAINT DataUrodzenia CHECK(DATEDIFF(YEAR, GETDATE(), DataUrodzenia) >= 16)
