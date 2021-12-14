@@ -1,58 +1,40 @@
-USE master
-GO
-
-DROP DATABASE IF EXISTS Szkola
-GO
-
-CREATE DATABASE SZKOLA
-GO
-
-USE Szkola
-GO
-
---1.
--- CREATE DATABASE Szkola
-
---2. -> Na sprawdzian
--- CREATE TABLE Uczen (ID INT NOT NULL IDENTITY(1,1),
--- Imie VARCHAR(30) NOT NULL CHECK(LEN(Imie) >= 3),
--- DrugieImie VARCHAR(30) CHECK(LEN(DrugieImie) >= 3),
--- Nazwisko VARCHAR(30) NOT NULL CHECK(LEN(Nazwisko) >= 3),
--- DataUrodzenia DATE NOT NULL)
-
--- OdpowiedŸ z tablicy:
--- CREATE TABLE Uczen (
---     Id INT NOT NULL IDENTITY UNIQUE,
---     Imie VARCHAR(30) NOT NULL CHECK(LEN(Imie) >= 3),
---     DrugieImie VARCHAR(30) CHECK(LEN(DrugieImie) >= 3),
---     Nazwisko VARCHAR(30) NOT NULL CHECK(LEN(Nazwisko) >= 3),
---     DataUrodzenia DATE NOT NULL
+-- USE master
+-- GO
+--
+-- DROP DATABASE IF EXISTS Panek
+-- CREATE DATABASE Panek
+--
+-- USE Panek
+-- GO
+--
+-- CREATE TABLE Samochody (
+--     NumerRej VARCHAR(10) NOT NULL PRIMARY KEY,
+--     Marka VARCHAR(30) NOT NULL CHECK(LEN(Marka) >= 3),
+--     RokProdukcji SMALLINT NOT NULL CHECK((RokProdukcji - GETDATE() <= 6)),
+--     CenaZaKm MONEY NOT NULL CHECK(CenaZaKm >= 1 AND 9999.99 >= CenaZaKm),
+--     Klimatyzacja CHAR(3) NOT NULL DEFAULT('TAK') CHECK(Klimatyzacja IN ('TAK', 'NIE')),
 -- )
+--
+-- ALTER TABLE Samochody
+-- ADD DataBadanTech DATE CHECK(DataBadanTech >= GETDATE())
+--
+-- ALTER TABLE Samochody
+-- ALTER COLUMN Klimatyzacja CHAR(3)
+--
+-- ALTER TABLE Samochody
+-- ADD CONSTRAINT CH_Marka CHECK(Marka IN ('FORD','TOYOTA','SEAT','BMW'))
+--
+-- ALTER TABLE Samochody
+-- DROP CONSTRAINT CK__Samochody__CenaZ__38996AB5 --Uwielbiam takie nazwy :D
+--
 
---3.
--- ALTER TABLE Uczen
--- ADD SredniaOcen NUMERIC(3,2) NOT NULL CHECK(SredniaOcen >= 1.0 AND SredniaOcen <= 6.0) DEFAULT(5.0)
-
---4.
--- ALTER Table Uczen
--- ALTER COLUMN Nazwisko VARCHAR(50) NOT NULL
-
---5.
--- ALTER Table Uczen
--- ALTER COLUMN DataUrodzenia DATE NOT NULL CHECK(DATEDIFF(YEAR, GETDATE(), DataUrodzenia) >= 16)
-
--- ALTER TABLE Uczen
--- ADD CONSTRAINT CK_DataUrodzenia CHECK(DATEDIFF(YEAR, DataUrodzenia, GETDATE()) >= 16)
-
-
-
-
-
---Druga lekcja
-
-CREATE TABLE Adresy (
-    Id INT PRIMARY KEY,
-    Ulica VARCHAR(30) NOT NULL,
-    Miasto VARCHAR(40) NOT NULL,
-    UczenId INT NOT NULL FOREIGN KEY REFERENCES Uczen(ID)
+--ZAD 7
+CREATE TABLE Klienci (
+    ID INT NOT NULL IDENTITY PRIMARY KEY,
+    Imie VARCHAR(30) NOT NULL,
+    Nazwisko VARCHAR(30) NOT NULL,
+    KartaKredytowa VARCHAR(20) NOT NULL,
+    NumerRej VARCHAR(10) NOT NULL FOREIGN KEY REFERENCES Samochody(NumerRej),
+    DataWypozyczenia DATE NOT NULL,
+    DataZwrotu DATE,
 )
