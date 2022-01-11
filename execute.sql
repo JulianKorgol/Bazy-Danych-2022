@@ -1,42 +1,66 @@
--- USE master
--- GO
+USE Sprawdzian2Poprawa
+GO
 
--- ZAD 1
--- DROP DATABASE IF EXISTS Panek
--- CREATE DATABASE Panek
 
--- USE Panek
--- GO
---
--- Zad 2
--- CREATE TABLE Samochody (
---     NumerRej VARCHAR(10) NOT NULL PRIMARY KEY,
---     Marka VARCHAR(30) NOT NULL CHECK(LEN(Marka) >= 3),
---     RokProdukcji SMALLINT NOT NULL CHECK((RokProdukcji - GETDATE() <= 6)),
---     CenaZaKm MONEY NOT NULL CHECK(CenaZaKm >= 1 AND 9999.99 >= CenaZaKm),
---     Klimatyzacja CHAR(3) NOT NULL DEFAULT('TAK') CHECK(Klimatyzacja IN ('TAK', 'NIE')),
--- )
---Zad 3
--- ALTER TABLE Samochody
--- ADD DataBadanTech DATE CHECK(DataBadanTech >= GETDATE())
---ZAD 4
--- ALTER TABLE Samochody
--- ALTER COLUMN Klimatyzacja CHAR(3)
 --ZAD 5
-ALTER TABLE Samochody
-ADD CONSTRAINT CH_Marka CHECK(Marka IN ('FORD','TOYOTA','SEAT','BMW'))
---ZAD 6
--- ALTER TABLE Samochody
--- DROP CONSTRAINT CK__Samochody__CenaZ__267ABA7A --Uwielbiam takie nazwy :D
---
+-- SELECT Nazwa, Gatunek
+-- FROM Zwierzeta
+-- WHERE LiczbaNog > 3
+-- EXCEPT
+-- SELECT Nazwa, Gatunek
+-- FROM Zwierzeta
+-- WHERE KrajWystepowania != 'Chiny'
+
+--Zad 6
+-- SELECT * FROM Eksperymenty
+-- SELECT * FROM Pracownicy
+-- SELECT * FROM Przydzialy
+
+-- SELECT Imie
+-- FROM Pracownicy
+-- JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
+-- WHERE KodEksperymentu = 'MMM77'
 
 --ZAD 7
-CREATE TABLE Klienci (
-    ID INT NOT NULL IDENTITY PRIMARY KEY,
-    Imie VARCHAR(30) NOT NULL,
-    Nazwisko VARCHAR(30) NOT NULL,
-    KartaKredytowa VARCHAR(25) NOT NULL,
-    NumerRej VARCHAR(10) NOT NULL FOREIGN KEY REFERENCES Samochody(NumerRej),
-    DataWypozyczenia DATETIME NOT NULL,
-    DataZwrotu DATETIME NOT NULL,
-)
+-- SELECT E.Kod
+-- FROM Pracownicy
+-- FULL OUTER JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
+-- FULL OUTER JOIN Eksperymenty E on P.KodEksperymentu = E.Kod
+-- WHERE Pracownicy.Id IS NULL
+
+--ZAD 8
+-- SELECT Imie, (SELECT COUNT(*) FROM Eksperymenty
+--     JOIN Przydzialy P on Eksperymenty.Kod = P.KodEksperymentu
+--     JOIN Pracownicy P2 on P2.Id = P.PracownikId
+--     WHERE P.PracownikId = Pracownicy.Id)
+-- FROM Pracownicy
+
+--Zad 9
+-- SELECT Imie
+-- FROM Pracownicy
+-- WHERE Zarobki < (SELECT AVG(Zarobki) FROM Pracownicy)
+
+--Zad 10
+-- SELECT e.Kod, (SELECT SUM(Zarobki) FROM Pracownicy JOIN Przydzialy P3 on Pracownicy.Id = P3.PracownikId WHERE P3.KodEksperymentu = e.Kod)
+-- FROM Eksperymenty AS e
+-- JOIN Przydzialy P on e.Kod = P.KodEksperymentu
+-- JOIN Pracownicy P2 on P2.Id = P.PracownikId
+-- GROUP BY e.Kod
+--
+-- SELECT Zarobki FROM Pracownicy
+
+--ZAD 11
+-- SELECT Imie, StopienNaukowy
+-- FROM Pracownicy
+-- WHERE Zarobki > (SELECT MIN(Zarobki)
+--     FROM Przydzialy prz
+--     JOIN Eksperymenty e ON prz.KodEksperymentu = e.Kod
+--     JOIN Pracownicy pra ON pra.ID = prz.PracownikId
+--     WHERE e.Dziedzina = 'Botanika')
+
+--ZAD 12
+-- SELECT Imie
+-- FROM Pracownicy
+-- JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
+-- JOIN Eksperymenty E on E.Kod = P.KodEksperymentu
+-- WHERE DATEDIFF(month, E.DataRozpoczecia, E.DataZakonczenia) > 20
