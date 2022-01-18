@@ -1,66 +1,57 @@
-USE Sprawdzian2Poprawa
+USE master
 GO
 
+CREATE DATABASE Sklep
 
---ZAD 5
--- SELECT Nazwa, Gatunek
--- FROM Zwierzeta
--- WHERE LiczbaNog > 3
--- EXCEPT
--- SELECT Nazwa, Gatunek
--- FROM Zwierzeta
--- WHERE KrajWystepowania != 'Chiny'
+USE Sklep
+GO
 
---Zad 6
--- SELECT * FROM Eksperymenty
--- SELECT * FROM Pracownicy
--- SELECT * FROM Przydzialy
+DROP TABLE Produkty
+GO
 
--- SELECT Imie
--- FROM Pracownicy
--- JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
--- WHERE KodEksperymentu = 'MMM77'
+--zad 2
+CREATE TABLE Produkty (
+    ID INT NOT NULL UNIQUE IDENTITY ,
+    NAZWA VARCHAR(30) NOT NULL CHECK(LEN(NAZWA) >= 3),
+    KATEGORIA VARCHAR(15) CHECK(KATEGORIA IN ('ELEKTRYKA', 'HYDRAULIKA', 'BUDOWA')),
+    CENA DECIMAL(6,2) NOT NULL CHECK(CENA >= 1 AND CENA <= 9999.99),
+    LICZBASZTUK SMALLINT NOT NULL DEFAULT(0) CHECK(LICZBASZTUK >= 0 AND LICZBASZTUK <= 99)
+)
 
---ZAD 7
--- SELECT E.Kod
--- FROM Pracownicy
--- FULL OUTER JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
--- FULL OUTER JOIN Eksperymenty E on P.KodEksperymentu = E.Kod
--- WHERE Pracownicy.Id IS NULL
+--zad 3
+INSERT Produkty (NAZWA, KATEGORIA, CENA, LICZBASZTUK) VALUES
+('Gniazdka', 'ELEKTRYKA', 5.50, 58),
+('Wkrêty', 'BUDOWA', 10.00, 99),
+('Rura 2m', 'HYDRAULIKA', 33.20, 42),
+('Bezpieczniki', 'ELEKTRYKA', 40.99, 86),
+('Drabina', 'BUDOWA', 200.00, 5),
+('Cement', 'BUDOWA', 25.00, 17)
 
---ZAD 8
--- SELECT Imie, (SELECT COUNT(*) FROM Eksperymenty
---     JOIN Przydzialy P on Eksperymenty.Kod = P.KodEksperymentu
---     JOIN Pracownicy P2 on P2.Id = P.PracownikId
---     WHERE P.PracownikId = Pracownicy.Id)
--- FROM Pracownicy
 
---Zad 9
--- SELECT Imie
--- FROM Pracownicy
--- WHERE Zarobki < (SELECT AVG(Zarobki) FROM Pracownicy)
+SELECT * FROM Produkty
+--zad 4
+UPDATE Produkty
+SET LICZBASZTUK = LICZBASZTUK - 6
+WHERE ID = 3
 
---Zad 10
--- SELECT e.Kod, (SELECT SUM(Zarobki) FROM Pracownicy JOIN Przydzialy P3 on Pracownicy.Id = P3.PracownikId WHERE P3.KodEksperymentu = e.Kod)
--- FROM Eksperymenty AS e
--- JOIN Przydzialy P on e.Kod = P.KodEksperymentu
--- JOIN Pracownicy P2 on P2.Id = P.PracownikId
--- GROUP BY e.Kod
---
--- SELECT Zarobki FROM Pracownicy
+UPDATE Produkty
+SET LICZBASZTUK = LICZBASZTUK - 15
+WHERE ID = 4
 
---ZAD 11
--- SELECT Imie, StopienNaukowy
--- FROM Pracownicy
--- WHERE Zarobki > (SELECT MIN(Zarobki)
---     FROM Przydzialy prz
---     JOIN Eksperymenty e ON prz.KodEksperymentu = e.Kod
---     JOIN Pracownicy pra ON pra.ID = prz.PracownikId
---     WHERE e.Dziedzina = 'Botanika')
+UPDATE Produkty
+SET LICZBASZTUK = LICZBASZTUK - 5
+WHERE ID = 5
 
---ZAD 12
--- SELECT Imie
--- FROM Pracownicy
--- JOIN Przydzialy P on Pracownicy.Id = P.PracownikId
--- JOIN Eksperymenty E on E.Kod = P.KodEksperymentu
--- WHERE DATEDIFF(month, E.DataRozpoczecia, E.DataZakonczenia) > 20
+--zad 5
+DELETE FROM Produkty
+WHERE LICZBASZTUK = 0
+
+--zad 6
+UPDATE Produkty
+SET CENA = CENA * 0.85
+WHERE KATEGORIA = 'ELEKTRYKA'
+
+--zad 7
+SELECT KATEGORIA, SUM(LICZBASZTUK * CENA)
+FROM Produkty
+GROUP BY KATEGORIA
