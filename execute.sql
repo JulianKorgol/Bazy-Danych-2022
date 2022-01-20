@@ -1,57 +1,78 @@
 USE master
 GO
 
-CREATE DATABASE Sklep
-
-USE Sklep
+DROP DATABASE IF EXISTS Poczta
 GO
 
-DROP TABLE Produkty
+CREATE DATABASE Poczta
 GO
 
---zad 2
-CREATE TABLE Produkty (
-    ID INT NOT NULL UNIQUE IDENTITY ,
-    NAZWA VARCHAR(30) NOT NULL CHECK(LEN(NAZWA) >= 3),
-    KATEGORIA VARCHAR(15) CHECK(KATEGORIA IN ('ELEKTRYKA', 'HYDRAULIKA', 'BUDOWA')),
-    CENA DECIMAL(6,2) NOT NULL CHECK(CENA >= 1 AND CENA <= 9999.99),
-    LICZBASZTUK SMALLINT NOT NULL DEFAULT(0) CHECK(LICZBASZTUK >= 0 AND LICZBASZTUK <= 99)
+USE Poczta
+GO
+
+--Zad 1
+CREATE TABLE Adresy (
+    ID INT PRIMARY KEY,
+    Ulica VARCHAR(30) NOT NULL CHECK(LEN(Ulica) >= 5),
+    NumerDomu VARCHAR(4) NOT NULL CHECK(LEN(NumerDomu) >= 1),
+    NumerLokalu VARCHAR(4),
+    KodPocztowy CHAR(6) NOT NULL CHECK(KodPocztowy LIKE '__-___')
 )
 
---zad 3
-INSERT Produkty (NAZWA, KATEGORIA, CENA, LICZBASZTUK) VALUES
-('Gniazdka', 'ELEKTRYKA', 5.50, 58),
-('Wkrêty', 'BUDOWA', 10.00, 99),
-('Rura 2m', 'HYDRAULIKA', 33.20, 42),
-('Bezpieczniki', 'ELEKTRYKA', 40.99, 86),
-('Drabina', 'BUDOWA', 200.00, 5),
-('Cement', 'BUDOWA', 25.00, 17)
+CREATE TABLE Paczki (
+    ID INT PRIMARY KEY,
+    Waga DECIMAL(3,1) NOT NULL CHECK(Waga >= 1),
+    DataNadania DATETIME NOT NULL,
+    Dostarczona CHAR(3) NOT NULL DEFAULT('NIE') CHECK(Dostarczona IN ('TAK', 'Nie')),
+    AdresId INT NOT NULL FOREIGN KEY REFERENCES Adresy (Id),
+)
 
+--Zad 2
+INSERT INTO Adresy (ID, Ulica, NumerDomu, NumerLokalu, KodPocztowy)
+VALUES
+(1, 'Leœna', '1', '3', '00-123'),
+(2,'Sasankowe', '10A', NULL, '10-001'),
+(3,'Chabrowa', '12', NULL, '99-777'),
+(4,'Lipowa', '44', '55', '60-006'),
+(5,'Sasankowa', '6H', '891', '00-123'),
+(6,'Cement', '2', '101', '17-120')
 
-SELECT * FROM Produkty
---zad 4
-UPDATE Produkty
-SET LICZBASZTUK = LICZBASZTUK - 6
-WHERE ID = 3
+INSERT INTO Paczki
+VALUES
+(10, 1.3, 2022-01-12, 'NIE', 3),
+(20, 2.7, 2022-01-20, 'NIE', 4),
+(30, 3.0, 2022-01-19, 'NIE', 1),
+(40, 1.3, 2022-01-12, 'NIE', 3),
+(50, 5.4, 2022-01-01, 'NIE', 6),
+(60, 2.2, 2022-01-09, 'NIE', 4)
 
-UPDATE Produkty
-SET LICZBASZTUK = LICZBASZTUK - 15
-WHERE ID = 4
+--ZAD 3
+UPDATE Paczki
+SET Dostarczona = 'TAK'
+WHERE DataNadania < 2022-01-15
 
-UPDATE Produkty
-SET LICZBASZTUK = LICZBASZTUK - 5
-WHERE ID = 5
+--ZAD 4
+-- Poniewa¿ data dostarczenia nie mo¿e byæ nullem.
+-- Adres ID nie mo¿e siê odwo³aæ do elementu, który nie istniejê.
+-- Data jest za du¿a, nie ma 15 miesi¹ca.
+-- Primary Key musi byæ unikalne.
 
---zad 5
-DELETE FROM Produkty
-WHERE LICZBASZTUK = 0
+--Zad 5
+DELETE Adresy
+WHERE Id IN ((SELECT Adresy.ID FROM Adresy LEFT OUTER JOIN Paczki P on Adresy.ID = P.AdresId WHERE P.id IS NULL))
 
---zad 6
-UPDATE Produkty
-SET CENA = CENA * 0.85
-WHERE KATEGORIA = 'ELEKTRYKA'
+--Zad 6
+DELETE Adresy
+WHERE ID = 6
+--Poniewa¿ jest zarejestrowana na niego paczka i przez co odwo³uje siê do niego klucz obcy.
 
---zad 7
-SELECT KATEGORIA, SUM(LICZBASZTUK * CENA)
-FROM Produkty
-GROUP BY KATEGORIA
+--Zad 7
+SELECT a.Id, a.Ulica, a.NumerDomu, a.NumerLokalu, a.KodPocztowy,
+       (SELECT COUNT(p2.ID) FROM Paczki p2 FULL OUTER JOIN Adresy A2 on A2.ID = p2.AdresId WHERE Dostarczona = 'TAK' AND A2.ID = a.ID) AS Dostarczona,
+       (SELECT COUNT(p2.ID) FROM Paczki p2 FULL OUTER JOIN Adresy A2 on A2.ID = p2.AdresId WHERE Dostarczona = 'NIE' AND A2.ID = a.ID) AS Niedostarczona
+FROM Adresy a
+--Drugi sposób (Pana sposób)
+SELECT *,
+       (SELECT COUNT(*) FROM Paczki p WHERE p.AdresId = a.ID AND Dostarczona = 'TAK') LiczbaDostarczonych,
+       (SELECT COUNT(*) FROM Paczki p WHERE p.AdresId = a.ID AND Dostarczona = 'NIE') LiczbaNiedostarczonych
+FROM Adresy a
