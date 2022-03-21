@@ -127,6 +127,19 @@ CREATE TABLE PracownikIZadanie (
 )
 
 -- Zadanie 2
+USE master
+GO
+
+DROP DATABASE IF EXISTS FedEx
+GO
+
+CREATE DATABASE FedEx
+GO
+
+USE FedEx
+GO
+
+
 CREATE TABLE Magazyn (
     numer CHAR(6) NOT NULL PRIMARY KEY CHECK(LEN(numer) = 6),
     szerokoscGeograficzna float NOT NULL,
