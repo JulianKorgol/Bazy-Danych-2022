@@ -50,8 +50,8 @@ CREATE OR ALTER TRIGGER trgUsunZamowienie ON Zamowienie AFTER DELETE AS
 --4
 CREATE OR ALTER TRIGGER trgPodwyzka ON Pracownik AFTER UPDATE AS
     BEGIN
-        DECLARE @ZarobkiPo FLOAT
-        DECLARE @ZarobkiPrzed FLOAT
+        DECLARE @ZarobkiPo MONEY
+        DECLARE @ZarobkiPrzed MONEY
         SET @ZarobkiPo = (SELECT Zarobki FROM inserted)
         SET @ZarobkiPrzed = (SELECT Zarobki FROM deleted)
         IF (@ZarobkiPo > (@ZarobkiPrzed * 1.3))
@@ -72,3 +72,6 @@ CREATE TRIGGER trgUsuwanieTabel ON DATABASE AFTER DROP_TABLE AS
         ROLLBACK TRANSACTION
         RAISERROR('Usuwanie tabel zabronione', 16, 1)
     end
+
+
+-- Czasem Triggery i procedury muszą zostać udzielonę poprzez: "GO".
