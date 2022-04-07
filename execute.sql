@@ -16,7 +16,7 @@ CREATE TRIGGER trgNowyKlient
 -- INSERT INTO Klient (Id, Imie, Nazwisko) VALUES
 --     (60, 'Julian', 'Korgol')
 
---2 - Do poprawy
+--2
 CREATE OR ALTER TRIGGER trgNoweZamowienie ON Zamowienie AFTER INSERT AS
     BEGIN
         DECLARE @Id VARCHAR(50)
