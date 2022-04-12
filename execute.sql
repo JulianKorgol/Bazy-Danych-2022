@@ -77,6 +77,7 @@ CREATE OR ALTER TRIGGER trgNowyPracownik ON Pracownik AFTER INSERT AS
         DECLARE @Id INT
         SET @StazPracy = (SELECT StazPracy FROM inserted)
         SET @Id = (SELECT Id FROM inserted)
+        --SELECT StazPracy = @StazPracy, Id = @Id FROM inserted --Zastępuje dwie powyższe linijki
         IF @StazPracy <= 2
         BEGIN
             SET @Wynagrodzenie = 2000
