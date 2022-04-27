@@ -1,45 +1,97 @@
---1
-CREATE PROC spLiczbaKsiazek AS
+USE Sprawdzian4
+GO
+
+--6
+CREATE PROC spFilmyRezysera AS
     BEGIN
-        SELECT COUNT(*) FROM Ksiazki
+        SELECT Rezyser, COUNT(*) FROM Filmy
+        GROUP BY Rezyser
     end
 
-EXEC spLiczbaKsiazek
+-- SELECT * FROM Filmy
+EXEC spFilmyRezysera
 
---2
-CREATE PROC spKsiazkiZKategorii @kategoria VARCHAR(30) = 'fantastyka' AS
+--7
+CREATE PROC spPromocja @rok INT AS
     BEGIN
-        SELECT * FROM Ksiazki
-        WHERE Kategoria = @kategoria
+        UPDATE Filmy
+        SET CenaBiletu = CenaBiletu - 5
+        WHERE @rok > RokWydania
     end
 
-EXEC  spKsiazkiZKategorii horror
+SELECT * FROM Filmy
+EXEC spPromocja 1995
 
---3
-CREATE OR ALTER TRIGGER trgUsunKsiazke ON Ksiazki AFTER DELETE AS
+
+--8
+CREATE OR ALTER TRIGGER trgZmianaCeny ON Filmy AFTER UPDATE AS
     BEGIN
-        DECLARE @LiczbaKsiazek INT
-        SET @LiczbaKsiazek = (SELECT COUNT(*) FROM Ksiazki)
+        DECLARE @staraCena money
+        DECLARE @nowaCena money
 
-        PRINT 'W tabeli pozostało ' + CAST(@LiczbaKsiazek AS VARCHAR(10)) + ' książek'
+        SET @staraCena = (SELECT CenaBiletu FROM deleted)
+        SET @nowaCena = (SELECT CenaBiletu FROM inserted)
+
+        PRINT 'Zmiana ceny z ' + CAST(@staraCena AS VARCHAR(10)) + ' na ' + CAST(@nowaCena AS VARCHAR(10))
     end
 
-DELETE FROM Ksiazki
-WHERE Cena = '21.34'
+UPDATE Filmy
+        SET CenaBiletu = CenaBiletu - 5
+        WHERE RokWydania < 1995
 
---4
-CREATE OR ALTER TRIGGER trgNowaKsiazka ON Ksiazki AFTER INSERT AS
+--9 -> Nie działa
+CREATE OR ALTER TRIGGER trgNowyFilm ON Filmy AFTER INSERT AS
     BEGIN
-        DECLARE @Cena FLOAT
+        DECLARE @tytul VARCHAR(100)
+        DECLARE @wiadomosc VARCHAR(200)
+        DECLARE @wBazie VARCHAR(100)
 
-        SET @Cena = (SELECT Cena FROM inserted)
+        SET @tytul = (SELECT Tytul FROM inserted)
+        SET @wiadomosc = 'Film ' + CAST(@tytul AS VARCHAR(100)) + ' już istnieje'
+        SET @wBazie = (SELECT Tytul FROM Filmy WHERE Tytul = @tytul)
 
-        IF @Cena > 100
+        IF @tytul = @wBazie
             BEGIN
-                RAISERROR('Książka zbyt droga', 16, 1)
+                RAISERROR(@wiadomosc, 16, 1)
                 ROLLBACK
             end
     end
 
-INSERT INTO Ksiazki (Tytul, Autor, Wydawca, Ocena, LiczbaOcen, LiczbaStron, DataWydania, Cena, Kategoria) VALUES
-    ('Siema', 'Julian Korgol', 'Techni Schools', 5.0, 8000, 10000, GETDATE(), 190.0, 'BESTSELLER')
+INSERT INTO Filmy VALUES
+    (9, 'Nie', 'Ja', '2022', 20.00)
+
+SELECT * FROM Filmy
+
+--10
+CREATE TABLE Student (
+    id INT IDENTITY PRIMARY KEY NOT NULL,
+    imie VARCHAR(30) NOT NULL CHECK(LEN(imie) >= 3),
+    nazwisko VARCHAR(30) NOT NULL CHECK(LEN(nazwisko) >= 3),
+    dataUrodzenia DATE NOT NULL CHECK(dataUrodzenia <= GETDATE()),
+    przedmiotID INT REFERENCES Przedmiot(id)
+)
+
+CREATE TABLE Przedmiot (
+    id INT IDENTITY PRIMARY KEY NOT NULL,
+    nazwa VARCHAR(50) NOT NULL CHECK(LEN(nazwa) >= 3),
+    numerSali SMALLINT NOT NULL,
+)
+
+--11
+CREATE OR ALTER TRIGGER trgCena ON Filmy AFTER INSERT, UPDATE AS
+    BEGIN
+        DECLARE @cena money
+
+        SET @cena = (SELECT CenaBiletu FROM inserted)
+
+        IF (@cena % 5) = 0
+        BEGIN
+            RAISERROR('Dodanie lub Aktualizacja ceny biletu niemożliwa', 16, 2)
+            ROLLBACK
+        end
+    end
+
+INSERT INTO Filmy VALUES
+    (11, 'nope', 'Władek', '2019', 13.00)
+
+SELECT * FROM Filmy
